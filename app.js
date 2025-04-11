@@ -8,6 +8,14 @@ const itemRoutes = require("./routes/clothingItems");
 
 mongoose.connect("mongodb://127.0.0.1:27017/wtwr_db");
 
+// Authentication Middleware
+app.use((req, res, next) => {
+  req.user = {
+    _id: "67f82e5869b2ace88d714ef9",
+  };
+  next();
+});
+
 app.get("/", (req, res) => {
   res.send("<h1>WORKS</h1>");
 });
