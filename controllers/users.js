@@ -70,7 +70,7 @@ const createUser = (req, res) => {
       .send({ message: "Unauthorized to access resource!" });
 
   User.create(data)
-    .then((result) => res.send(result))
+    .then((result) => res.status(201).send(result))
     .catch((err) => {
       console.error(
         `Error ${err.name} with the message ${err.message} has occurred while executing the code`
