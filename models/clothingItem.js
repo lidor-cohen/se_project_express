@@ -1,3 +1,4 @@
+const { isURL } = require("validator");
 const { Schema, model } = require("mongoose");
 
 const clothingItemSchema = Schema({
@@ -15,6 +16,12 @@ const clothingItemSchema = Schema({
   imageUrl: {
     type: String,
     required: true,
+    validate: {
+      validator: function (val) {
+        return isURL(val);
+      },
+      message: "You must enter a valid URL",
+    },
   },
   owner: {
     type: Schema.Types.ObjectId,
@@ -24,6 +31,7 @@ const clothingItemSchema = Schema({
   likes: [
     {
       type: Schema.Types.ObjectId,
+      ref: "user",
       required: true,
     },
   ],
@@ -34,4 +42,4 @@ const clothingItemSchema = Schema({
   },
 });
 
-module.exports = model("clothingItem", clothingItemSchema);
+module.exports = model("item", clothingItemSchema);

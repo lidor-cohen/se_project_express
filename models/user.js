@@ -1,4 +1,5 @@
 const { Schema, model } = require("mongoose");
+var { isURL } = require("validator");
 
 const userSchema = Schema({
   name: {
@@ -10,9 +11,11 @@ const userSchema = Schema({
   avatar: {
     type: String,
     required: true,
-    validation: {
-      validator: (val) =>
-        val.startsWith("http://") || val.startsWith("https://"),
+    validate: {
+      validator: function (val) {
+        return isURL(val);
+      },
+      message: "You must enter a valid URL",
     },
   },
 });

@@ -6,7 +6,7 @@
   "scripts": {
     "lint": "npx eslint .",
     "start": "PORT=3001 node .",
-    "dev": "nodemon ."
+    "dev": "nodemon app.js"
   },
   "repository": {
     "type": "git",
