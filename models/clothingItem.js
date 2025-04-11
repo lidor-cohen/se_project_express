@@ -17,7 +17,7 @@ const clothingItemSchema = Schema({
     type: String,
     required: true,
     validate: {
-      validator: function (val) {
+      validator(val) {
         return isURL(val);
       },
       message: "You must enter a valid URL",

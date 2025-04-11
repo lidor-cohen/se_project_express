@@ -1,5 +1,6 @@
 const express = require("express");
 const mongoose = require("mongoose");
+
 const { PORT = 3001 } = process.env;
 const app = express();
 
@@ -25,12 +26,12 @@ app.use("/users", userRoutes);
 app.use("/items", itemRoutes);
 
 // 404 Middleware
-app.use((req, res, next) => {
+app.use((req, res) => {
   res.status(404).send({
     message: "Requested resource not found",
   });
 });
 
 app.listen(PORT, () => {
-  console.log(PORT);
+  console.log(`Server listens on port ${PORT}`);
 });

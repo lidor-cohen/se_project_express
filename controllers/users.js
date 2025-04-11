@@ -14,11 +14,9 @@ const getUsers = (req, res) => {
       .status(UNAUTHORIZED)
       .send({ message: "Unauthorized to access resource!" });
 
-  User.find({})
+  return User.find({})
     .orFail()
-    .then((result) => {
-      return res.send(result);
-    })
+    .then((result) => res.send(result))
     .catch((err) => {
       console.error(
         `Error ${err.name} with the message ${err.message} has occurred while executing the code`
@@ -38,7 +36,7 @@ const getUserById = (req, res) => {
       .status(UNAUTHORIZED)
       .send({ message: "Unauthorized to access resource!" });
 
-  User.findById(userId)
+  return User.findById(userId)
     .orFail()
     .then((result) => res.send(result))
     .catch((err) => {
@@ -49,14 +47,15 @@ const getUserById = (req, res) => {
         return res
           .status(BAD_REQUEST)
           .send({ message: "ID format is invalid" });
-      else if (err.name === "DocumentNotFoundError")
+
+      if (err.name === "DocumentNotFoundError")
         return res
           .status(NOT_FOUND)
           .send({ message: `Clothing item not found` });
-      else
-        return res
-          .status(INTERNAL_SERVER_ERROR)
-          .send({ message: "An error has occurred on the server" });
+
+      return res
+        .status(INTERNAL_SERVER_ERROR)
+        .send({ message: "An error has occurred on the server" });
     });
 };
 
@@ -69,19 +68,18 @@ const createUser = (req, res) => {
       .status(UNAUTHORIZED)
       .send({ message: "Unauthorized to access resource!" });
 
-  User.create(data)
+  return User.create(data)
     .then((result) => res.status(201).send(result))
     .catch((err) => {
       console.error(
         `Error ${err.name} with the message ${err.message} has occurred while executing the code`
       );
-      if (err.name === "ValidationError") {
+      if (err.name === "ValidationError")
         return res.status(BAD_REQUEST).send({ message: "Invalid data passed" });
-      } else {
-        return res
-          .status(INTERNAL_SERVER_ERROR)
-          .send({ message: "An error has occurred on the server" });
-      }
+
+      return res
+        .status(INTERNAL_SERVER_ERROR)
+        .send({ message: "An error has occurred on the server" });
     });
 };
 

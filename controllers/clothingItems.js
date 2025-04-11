@@ -3,7 +3,6 @@ const {
   NOT_FOUND,
   INTERNAL_SERVER_ERROR,
   UNAUTHORIZED,
-  CONFLICT,
 } = require("../utils/errors");
 const ClothingItem = require("../models/clothingItem");
 
@@ -14,7 +13,7 @@ const getAllClothes = (req, res) => {
       .status(UNAUTHORIZED)
       .send({ message: "Unauthorized to access resource!" });
 
-  ClothingItem.find({})
+  return ClothingItem.find({})
     .then((result) => res.send(result))
     .catch((err) => {
       console.error(
@@ -37,7 +36,7 @@ const createNewClothingItem = (req, res) => {
 
   data.owner = req.user._id;
 
-  ClothingItem.create(data)
+  return ClothingItem.create(data)
     .then((result) => res.status(201).send(result))
     .catch((err) => {
       console.error(
@@ -45,14 +44,15 @@ const createNewClothingItem = (req, res) => {
       );
       if (err.name === "ValidationError")
         return res.status(BAD_REQUEST).send({ message: "Invalid data passed" });
-      else if (err.name === "CastError")
+
+      if (err.name === "CastError")
         return res
           .status(BAD_REQUEST)
           .send({ message: "ID format is invalid" });
-      else
-        return res
-          .status(INTERNAL_SERVER_ERROR)
-          .send({ message: "An error has occurred on the server" });
+
+      return res
+        .status(INTERNAL_SERVER_ERROR)
+        .send({ message: "An error has occurred on the server" });
     });
 };
 
@@ -65,11 +65,11 @@ const deleteClothingItem = (req, res) => {
       .status(UNAUTHORIZED)
       .send({ message: "Unauthorized to delete resource!" });
 
-  ClothingItem.findByIdAndDelete(itemId)
+  return ClothingItem.findByIdAndDelete(itemId)
     .orFail()
-    .then((result) => {
-      return res.send({ message: "Item deleted successfully!", item: result });
-    })
+    .then((result) =>
+      res.send({ message: "Item deleted successfully!", item: result })
+    )
     .catch((err) => {
       console.error(
         `Error ${err.name} with the message ${err.message} has occurred while executing the code`
@@ -78,14 +78,15 @@ const deleteClothingItem = (req, res) => {
         return res
           .status(BAD_REQUEST)
           .send({ message: "ID format is invalid" });
-      else if (err.name === "DocumentNotFoundError")
+
+      if (err.name === "DocumentNotFoundError")
         return res
           .status(NOT_FOUND)
           .send({ message: `Clothing item with the id '${itemId}' not found` });
-      else
-        return res
-          .status(INTERNAL_SERVER_ERROR)
-          .send({ message: "An error has occurred on the server" });
+
+      return res
+        .status(INTERNAL_SERVER_ERROR)
+        .send({ message: "An error has occurred on the server" });
     });
 };
 
@@ -98,7 +99,7 @@ const likeItem = (req, res) => {
       .status(UNAUTHORIZED)
       .send({ message: "Unauthorized to like item!" });
 
-  ClothingItem.findByIdAndUpdate(
+  return ClothingItem.findByIdAndUpdate(
     itemId,
     { $addToSet: { likes: req.user._id } },
     { new: true }
@@ -114,14 +115,15 @@ const likeItem = (req, res) => {
         return res
           .status(BAD_REQUEST)
           .send({ message: "ID format is invalid" });
-      else if (err.name === "DocumentNotFoundError")
+
+      if (err.name === "DocumentNotFoundError")
         return res
           .status(NOT_FOUND)
           .send({ message: `Clothing item with the id '${itemId}' not found` });
-      else
-        return res
-          .status(INTERNAL_SERVER_ERROR)
-          .send({ message: "An error has occurred on the server" });
+
+      return res
+        .status(INTERNAL_SERVER_ERROR)
+        .send({ message: "An error has occurred on the server" });
     });
 };
 
@@ -134,7 +136,7 @@ const dislikeItem = (req, res) => {
       .status(UNAUTHORIZED)
       .send({ message: "Unauthorized to dislike item!" });
 
-  ClothingItem.findByIdAndUpdate(
+  return ClothingItem.findByIdAndUpdate(
     itemId,
     { $pull: { likes: req.user._id } },
     { new: true }
@@ -150,14 +152,15 @@ const dislikeItem = (req, res) => {
         return res
           .status(BAD_REQUEST)
           .send({ message: "ID format is invalid" });
-      else if (err.name === "DocumentNotFoundError")
+
+      if (err.name === "DocumentNotFoundError")
         return res
           .status(NOT_FOUND)
           .send({ message: `Clothing item with the id '${itemId}' not found` });
-      else
-        return res
-          .status(INTERNAL_SERVER_ERROR)
-          .send({ message: "An error has occurred on the server" });
+
+      return res
+        .status(INTERNAL_SERVER_ERROR)
+        .send({ message: "An error has occurred on the server" });
     });
 };
 

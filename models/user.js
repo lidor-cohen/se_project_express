@@ -1,5 +1,5 @@
 const { Schema, model } = require("mongoose");
-var { isURL } = require("validator");
+const { isURL } = require("validator");
 
 const userSchema = Schema({
   name: {
@@ -12,7 +12,7 @@ const userSchema = Schema({
     type: String,
     required: true,
     validate: {
-      validator: function (val) {
+      validator(val) {
         return isURL(val);
       },
       message: "You must enter a valid URL",

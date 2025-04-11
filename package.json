@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "lint": "npx eslint .",
-    "start": "PORT=3001 node .",
+    "start": "PORT=3001 node app.js",
     "dev": "nodemon app.js"
   },
   "repository": {
