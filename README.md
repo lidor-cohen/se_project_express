@@ -1,6 +1,6 @@
 # WTWR Backend API
 
-Express + MongoDB backend for the "What to Wear?" app.
+This is the backend server for the **What to Wear? (WTWR)** web application. It’s built with **Express.js** and uses **MongoDB** via **Mongoose** to manage users and clothing items. The project includes route handling, schema validation, error management, and a temporary authorization setup.
 
 ## 🚀 Features
 
