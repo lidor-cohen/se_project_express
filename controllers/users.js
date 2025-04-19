@@ -1,19 +1,19 @@
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+
+const { JWT_SECRET } = require("../utils/config");
+
 const {
   BAD_REQUEST,
   NOT_FOUND,
   INTERNAL_SERVER_ERROR,
   UNAUTHORIZED,
+  CONFLICT,
 } = require("../utils/errors");
-
 const User = require("../models/user");
 
 // Get all users
 const getUsers = (req, res) => {
-  if (!req.user?._id)
-    return res
-      .status(UNAUTHORIZED)
-      .send({ message: "Unauthorized to access resource!" });
-
   return User.find({})
     .orFail()
     .then((result) => res.send(result))
@@ -28,13 +28,8 @@ const getUsers = (req, res) => {
 };
 
 // Get a user by id
-const getUserById = (req, res) => {
-  const { userId } = req.params;
-
-  if (!req.user?._id)
-    return res
-      .status(UNAUTHORIZED)
-      .send({ message: "Unauthorized to access resource!" });
+const getCurrentUser = (req, res) => {
+  return console.log(req.user);
 
   return User.findById(userId)
     .orFail()
@@ -61,26 +56,57 @@ const getUserById = (req, res) => {
 
 // Create a user
 const createUser = (req, res) => {
-  const data = req.body;
+  const { email, password, name, avatar } = req.body;
 
-  if (!req.user?._id)
-    return res
-      .status(UNAUTHORIZED)
-      .send({ message: "Unauthorized to access resource!" });
+  if (!password)
+    return res.status(BAD_REQUEST).send({ message: "Invalid data passed" });
 
-  return User.create(data)
-    .then((result) => res.status(201).send(result))
+  return bcrypt.hash(password, 10).then((encryptedPassword) =>
+    User.create({ email, password: encryptedPassword, name, avatar })
+      .then((result) => res.status(201).send(result))
+      .catch((err) => {
+        console.error(
+          `Error ${err.name} with the message ${err.message} has occurred while executing the code`
+        );
+        if (err.name === "ValidationError")
+          return res
+            .status(BAD_REQUEST)
+            .send({ message: "Invalid data passed" });
+
+        if (err.name === "MongoServerError")
+          return res
+            .status(CONFLICT)
+            .send({ message: "Duplicate email found!" });
+
+        return res
+          .status(INTERNAL_SERVER_ERROR)
+          .send({ message: "An error has occurred on the server" });
+      })
+  );
+};
+
+// Login a user
+const login = (req, res) => {
+  return User.findUserByCredentials({
+    email: req.body.email,
+    password: req.body.password,
+  })
+    .then((user) => {
+      const token = jwt
+        .sign({ _id: user._id }, JWT_SECRET, {
+          expiresIn: "7d",
+        })
+        .catch(() =>
+          res
+            .status(UNAUTHORIZED)
+            .send({ message: "Unauthorized to access resource!" })
+        );
+
+      return res.send({ token });
+    })
     .catch((err) => {
-      console.error(
-        `Error ${err.name} with the message ${err.message} has occurred while executing the code`
-      );
-      if (err.name === "ValidationError")
-        return res.status(BAD_REQUEST).send({ message: "Invalid data passed" });
-
-      return res
-        .status(INTERNAL_SERVER_ERROR)
-        .send({ message: "An error has occurred on the server" });
+      res.send({ message: err.message });
     });
 };
 
-module.exports = { getUsers, getUserById, createUser };
+module.exports = { getUsers, getCurrentUser, createUser, login };

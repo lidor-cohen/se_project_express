@@ -1,21 +1,23 @@
+// Dependencies
 const express = require("express");
-const router = require("express").Router();
+const router = express.Router();
+
+// Routes
 const userRoutes = require("./users");
 const itemRoutes = require("./clothingItems");
+
+// External
 const { NOT_FOUND } = require("../utils/errors");
+const { createUser, login } = require("../controllers/users");
 
-// Auth Middleware
-router.use((req, res, next) => {
-  req.user = {
-    _id: "67f82e5869b2ace88d714ef9",
-  };
-  next();
-});
-
-// JSON Middleware
+// Use JSON middleware
 router.use(express.json());
 
-// Basic routes
+// Sign-in & Sign-up Routes
+router.post("/signin", login);
+router.post("/signup", createUser);
+
+// Basic Routes
 router.use("/users", userRoutes);
 router.use("/items", itemRoutes);
 
