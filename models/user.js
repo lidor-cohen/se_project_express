@@ -40,8 +40,10 @@ const userSchema = Schema(
   {
     toJSON: {
       transform: (doc, ret) => {
-        delete ret.password;
-        return ret;
+        // Create a new object without the password property
+        const returnObject = { ...ret };
+        delete returnObject.password;
+        return returnObject;
       },
     },
   }
