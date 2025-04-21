@@ -3,17 +3,13 @@ const {
   NOT_FOUND,
   INTERNAL_SERVER_ERROR,
   UNAUTHORIZED,
+  FORBIDDEN,
 } = require("../utils/errors");
 const ClothingItem = require("../models/clothingItem");
 
 // Get all clothing items
-const getAllClothes = (req, res) => {
-  if (!req.user?._id)
-    return res
-      .status(UNAUTHORIZED)
-      .send({ message: "Unauthorized to access resource!" });
-
-  return ClothingItem.find({})
+const getAllClothes = (req, res) =>
+  ClothingItem.find({})
     .then((result) => res.send(result))
     .catch((err) => {
       console.error(
@@ -23,17 +19,10 @@ const getAllClothes = (req, res) => {
         .status(INTERNAL_SERVER_ERROR)
         .send({ message: "An error has occurred on the server" });
     });
-};
 
 // Create a new clothing item
 const createNewClothingItem = (req, res) => {
   const data = req.body;
-
-  if (!req.user?._id)
-    return res
-      .status(UNAUTHORIZED)
-      .send({ message: "Unauthorized to create resource!" });
-
   data.owner = req.user._id;
 
   return ClothingItem.create(data)
@@ -60,15 +49,20 @@ const createNewClothingItem = (req, res) => {
 const deleteClothingItem = (req, res) => {
   const { itemId } = req.params;
 
-  if (!req.user?._id)
-    return res
-      .status(UNAUTHORIZED)
-      .send({ message: "Unauthorized to delete resource!" });
-
-  return ClothingItem.findByIdAndDelete(itemId)
+  return ClothingItem.findOne({ _id: itemId })
     .orFail()
+    .then((result) => {
+      if (req.user._id !== result.owner.toString())
+        return Promise.reject(new Error("User is not the owner of the item!"));
+
+      return Promise.resolve();
+    })
+    .then(() => ClothingItem.findByIdAndDelete(itemId))
     .then((result) =>
-      res.send({ message: "Item deleted successfully!", item: result })
+      res.send({
+        message: "Item deleted successfully!",
+        item: result,
+      })
     )
     .catch((err) => {
       console.error(
@@ -80,9 +74,12 @@ const deleteClothingItem = (req, res) => {
           .send({ message: "ID format is invalid" });
 
       if (err.name === "DocumentNotFoundError")
-        return res
-          .status(NOT_FOUND)
-          .send({ message: `Clothing item with the id '${itemId}' not found` });
+        return res.status(NOT_FOUND).send({
+          message: `Clothing item with the id '${itemId}' not found`,
+        });
+
+      if (err.message.includes("owner"))
+        return res.status(FORBIDDEN).send({ message: err.message });
 
       return res
         .status(INTERNAL_SERVER_ERROR)

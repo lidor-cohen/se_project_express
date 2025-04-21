@@ -13,8 +13,8 @@ const {
 const User = require("../models/user");
 
 // Get all users
-const getUsers = (req, res) => {
-  return User.find({})
+const getUsers = (req, res) =>
+  User.find({})
     .orFail()
     .then((result) => res.send(result))
     .catch((err) => {
@@ -25,13 +25,10 @@ const getUsers = (req, res) => {
         .status(INTERNAL_SERVER_ERROR)
         .send({ message: "An error has occurred on the server" });
     });
-};
 
 // Get a user by id
-const getCurrentUser = (req, res) => {
-  return console.log(req.user);
-
-  return User.findById(userId)
+const getCurrentUser = (req, res) =>
+  User.findById(req.user._id)
     .orFail()
     .then((result) => res.send(result))
     .catch((err) => {
@@ -44,9 +41,35 @@ const getCurrentUser = (req, res) => {
           .send({ message: "ID format is invalid" });
 
       if (err.name === "DocumentNotFoundError")
+        return res.status(NOT_FOUND).send({ message: `User not found` });
+
+      return res
+        .status(INTERNAL_SERVER_ERROR)
+        .send({ message: "An error has occurred on the server" });
+    });
+
+// Update a user by id
+const updateUser = (req, res) => {
+  const updateProperties = {};
+  if (req.body.name) updateProperties.name = req.body.name;
+  if (req.body.avatar) updateProperties.avatar = req.body.avatar;
+
+  return User.findByIdAndUpdate(req.user._id, updateProperties, {
+    new: true,
+  })
+    .orFail()
+    .then((result) => res.send(result))
+    .catch((err) => {
+      console.error(
+        `Error ${err.name} with the message ${err.message} has occurred while executing the code`
+      );
+      if (err.name === "CastError")
         return res
-          .status(NOT_FOUND)
-          .send({ message: `Clothing item not found` });
+          .status(BAD_REQUEST)
+          .send({ message: "ID format is invalid" });
+
+      if (err.name === "DocumentNotFoundError")
+        return res.status(NOT_FOUND).send({ message: `User not found` });
 
       return res
         .status(INTERNAL_SERVER_ERROR)
@@ -86,27 +109,35 @@ const createUser = (req, res) => {
 };
 
 // Login a user
-const login = (req, res) => {
-  return User.findUserByCredentials({
+const login = (req, res) =>
+  User.findUserByCredentials({
     email: req.body.email,
     password: req.body.password,
   })
     .then((user) => {
-      const token = jwt
-        .sign({ _id: user._id }, JWT_SECRET, {
-          expiresIn: "7d",
-        })
-        .catch(() =>
-          res
-            .status(UNAUTHORIZED)
-            .send({ message: "Unauthorized to access resource!" })
-        );
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
+        expiresIn: "7d",
+      });
 
       return res.send({ token });
     })
     .catch((err) => {
-      res.send({ message: err.message });
-    });
-};
+      console.error(
+        `Error ${err.name} with the message ${err.message} has occurred while executing the code`
+      );
 
-module.exports = { getUsers, getCurrentUser, createUser, login };
+      if (err.message.includes("not provided"))
+        return res.status(BAD_REQUEST).send({ message: err.message });
+
+      return res
+        .status(UNAUTHORIZED)
+        .send({ message: "Unauthorized to access resource!" });
+    });
+
+module.exports = {
+  getUsers,
+  getCurrentUser,
+  createUser,
+  login,
+  updateUser,
+};
