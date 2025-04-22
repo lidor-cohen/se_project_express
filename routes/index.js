@@ -1,6 +1,5 @@
 // Dependencies
 const express = require("express");
-const cors = require("cors");
 
 // Sub-Dependencies
 const router = express.Router();
@@ -12,10 +11,6 @@ const itemRoutes = require("./clothingItems");
 // External
 const { NOT_FOUND } = require("../utils/errors");
 const { createUser, login } = require("../controllers/users");
-
-// Use JSON middleware
-router.use(cors());
-router.use(express.json());
 
 // Sign-in & Sign-up Routes
 router.post("/signin", login);

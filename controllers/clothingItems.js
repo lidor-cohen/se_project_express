@@ -2,7 +2,6 @@ const {
   BAD_REQUEST,
   NOT_FOUND,
   INTERNAL_SERVER_ERROR,
-  UNAUTHORIZED,
   FORBIDDEN,
 } = require("../utils/errors");
 const ClothingItem = require("../models/clothingItem");
@@ -91,11 +90,6 @@ const deleteClothingItem = (req, res) => {
 const likeItem = (req, res) => {
   const { itemId } = req.params;
 
-  if (!req.user?._id)
-    return res
-      .status(UNAUTHORIZED)
-      .send({ message: "Unauthorized to like item!" });
-
   return ClothingItem.findByIdAndUpdate(
     itemId,
     { $addToSet: { likes: req.user._id } },
@@ -127,11 +121,6 @@ const likeItem = (req, res) => {
 // Dislikes an item
 const dislikeItem = (req, res) => {
   const { itemId } = req.params;
-
-  if (!req.user?._id)
-    return res
-      .status(UNAUTHORIZED)
-      .send({ message: "Unauthorized to dislike item!" });
 
   return ClothingItem.findByIdAndUpdate(
     itemId,

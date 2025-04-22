@@ -12,20 +12,6 @@ const {
 } = require("../utils/errors");
 const User = require("../models/user");
 
-// Get all users
-const getUsers = (req, res) =>
-  User.find({})
-    .orFail()
-    .then((result) => res.send(result))
-    .catch((err) => {
-      console.error(
-        `Error ${err.name} with the message ${err.message} has occurred while executing the code`
-      );
-      return res
-        .status(INTERNAL_SERVER_ERROR)
-        .send({ message: "An error has occurred on the server" });
-    });
-
 // Get a user by id
 const getCurrentUser = (req, res) =>
   User.findById(req.user._id)
@@ -56,6 +42,7 @@ const updateUser = (req, res) => {
 
   return User.findByIdAndUpdate(req.user._id, updateProperties, {
     new: true,
+    runValidators: true,
   })
     .orFail()
     .then((result) => res.send(result))
@@ -67,6 +54,10 @@ const updateUser = (req, res) => {
         return res
           .status(BAD_REQUEST)
           .send({ message: "ID format is invalid" });
+
+      if (err.name === "ValidationError") {
+        return res.status(BAD_REQUEST).send({ message: "Invalid data passed" });
+      }
 
       if (err.name === "DocumentNotFoundError")
         return res.status(NOT_FOUND).send({ message: `User not found` });
@@ -135,7 +126,6 @@ const login = (req, res) =>
     });
 
 module.exports = {
-  getUsers,
   getCurrentUser,
   createUser,
   login,
