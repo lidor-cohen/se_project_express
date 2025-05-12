@@ -2,6 +2,10 @@
 
 This is the backend server for the **What to Wear? (WTWR)** web application. It’s built with **Express.js** and uses **MongoDB** via **Mongoose** to manage users and clothing items. The project includes route handling, schema validation, error management, and a temporary authorization setup.
 
+## 🏄 Available on
+
+API Public URL: `https://api.what-to-wear.twilightparadox.com/`
+
 ## 🚀 Features
 
 - REST API for users & clothing items
@@ -33,7 +37,3 @@ This is the backend server for the **What to Wear? (WTWR)** web application. It�
 npm run start   # to launch the server
 npm run dev     # to launch the server with the hot reload feature
 ```
-
-### Testing
-
-Before committing your code, make sure you edit the file `sprint.txt` in the root folder. The file `sprint.txt` should contain the number of the sprint you're currently working on. For ex. 12
