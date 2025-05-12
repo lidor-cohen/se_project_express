@@ -12,6 +12,13 @@ const itemRoutes = require("./clothingItems");
 const { NOT_FOUND } = require("../utils/errors");
 const { createUser, login } = require("../controllers/users");
 
+// Crash Test
+router.get("/crash-test", () => {
+  setTimeout(() => {
+    throw new Error("Server will crash now");
+  }, 0);
+});
+
 // Sign-in & Sign-up Routes
 router.post("/signin", login);
 router.post("/signup", createUser);
