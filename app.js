@@ -31,7 +31,6 @@ app.use(errorLogger);
 
 // Use error handler
 app.use(errors());
-app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`Server listens on port ${PORT}`);
