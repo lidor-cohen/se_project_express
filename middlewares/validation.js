@@ -39,6 +39,16 @@ const validateLoginUser = celebrate({
   }),
 });
 
+const validateUpdateUser = celebrate({
+  body: Joi.object().keys({
+    name: Joi.string().required().min(2).max(30),
+    avatar: Joi.string().required().custom(validateURL).messages({
+      "string.empty": 'The "avatar" field must be filled in',
+      "string.uri": 'the "avatar" field must be a valid url',
+    }),
+  }),
+});
+
 const validateId = celebrate({
   params: Joi.object().keys({
     id: Joi.string().hex().length(24),
@@ -49,5 +59,6 @@ module.exports = {
   validateCreateItem,
   validateCreateUser,
   validateLoginUser,
+  validateUpdateUser,
   validateId,
 };

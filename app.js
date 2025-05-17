@@ -16,8 +16,6 @@ mongoose.connect("mongodb://127.0.0.1:27017/wtwr_db").then(() => {
   console.log("Database Connected!");
 });
 
-console.log(process.env);
-
 // Use JSON middleware
 app.use(cors());
 app.use(express.json());

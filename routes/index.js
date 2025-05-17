@@ -9,8 +9,12 @@ const userRoutes = require("./users");
 const itemRoutes = require("./clothingItems");
 
 // External
-const { NOT_FOUND } = require("../utils/errors");
 const { createUser, login } = require("../controllers/users");
+
+const {
+  validateLoginUser,
+  validateCreateUser,
+} = require("../middlewares/validation");
 
 // Crash Test
 router.get("/crash-test", () => {
@@ -20,18 +24,11 @@ router.get("/crash-test", () => {
 });
 
 // Sign-in & Sign-up Routes
-router.post("/signin", login);
-router.post("/signup", createUser);
+router.post("/signin", validateLoginUser, login);
+router.post("/signup", validateCreateUser, createUser);
 
 // Basic Routes
 router.use("/users", userRoutes);
 router.use("/items", itemRoutes);
-
-// 404 Routing
-router.use((req, res) => {
-  res.status(NOT_FOUND).send({
-    message: "Requested resource not found",
-  });
-});
 
 module.exports = router;
